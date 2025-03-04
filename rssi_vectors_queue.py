@@ -41,7 +41,7 @@ def calculate_distance(rssi):
     """Calculates distance using the Friis equation."""
     return K / (10 ** (rssi / 10))
 
-def process_rssi_data(port, baudrate, anchor_vector):
+def process_rssi_data(port, baudrate, anchor_vector): #get from topic not serial
     """Reads data from a specified serial port and processes RSSI values into an AnchorVector object."""
     try:
         with serial.Serial(port, baudrate, timeout=1) as ser:
