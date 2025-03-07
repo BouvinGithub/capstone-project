@@ -45,20 +45,21 @@ def process_rssi_data(msg):
     try:
         data = msg.data
         try:
-            data_list = data.split(",")
-            if len(data_list) > NUM_DATA:
-                rssi = int(data_list[RSSI])
-                distance = calculate_distance(rssi)
-                elevation = float(data_list[ELEVATION])
-                azimuth = float(data_list[AZIMUTH])
-                
-                anchor_vector.add_vector(rssi, distance, elevation, azimuth)
-
-                if len(anchor_vector.vectors) >= BUFFER_SIZE:
-                    avg_vector = anchor_vector.weighted_average()
-                    output_msg = f"{avg_vector[0]:.2f},{avg_vector[1]:.2f},{avg_vector[2]:.2f},{avg_vector[3]:.2f}"
-                    pub.publish(output_msg)
+            if !data.isEmpty() # this will probably break
+                data_list = data.split(",")
+                if len(data_list) > NUM_DATA:
+                    rssi = int(data_list[RSSI])
+                    distance = calculate_distance(rssi)
+                    elevation = float(data_list[ELEVATION])
+                    azimuth = float(data_list[AZIMUTH])
+                    
+                    anchor_vector.add_vector(rssi, distance, elevation, azimuth)
     
+                    if len(anchor_vector.vectors) >= BUFFER_SIZE:
+                        avg_vector = anchor_vector.weighted_average()
+                        output_msg = f"{avg_vector[0]:.2f},{avg_vector[1]:.2f},{avg_vector[2]:.2f},{avg_vector[3]:.2f}"
+                        pub.publish(output_msg)
+        
         except (ValueError, UnicodeDecodeError):
             rospy.logwarn("Received malformed data, ignoring it.")
     except Exception as e:
