@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#how to communicate with other file
+#import?
 import rospy, math
 from geometry_msgs.msg import Twist
 
@@ -42,11 +44,24 @@ class Robot:
         self.rotate_to_angle(target_angle)
         self.move_to_distance(target_distance)
 
+    def callback(data):
+        try:
+            data = msg.data
+
 if __name__ == '__main__':
+    rospy.init_node("robot_drive")
+    sub = rospy.Subscriber("/processed_aoa_data", String, callback)
+
+    rate = rospy.Rate(10)
+    while not rospy.is_shutdown():
+        rate.sleep()
+    
     try:
         myRobot = Robot()
-        target_angle = math.radians(45)  # Set desired angle in degrees
-        target_distance = 1.0  # Set desired distance in meters
+        data_list = data.split(",")
+        target_angle = -data_list[3]  # Set desired angle in degrees
+        target_distance = data_list[1] # Set desired distance in meters
         myRobot.go_to_target(target_angle, target_distance)
+        
     except rospy.ROSInterruptException:
         pass
