@@ -1,5 +1,6 @@
 import rospy
 import numpy as np
+import threading
 from collections import deque
 from std_msgs.msg import String
 
@@ -45,7 +46,6 @@ def process_rssi_data(msg):
     try:
         data = msg.data
         try:
-            if !data.isEmpty() # this will probably break
                 data_list = data.split(",")
                 if len(data_list) > NUM_DATA:
                     rssi = int(data_list[RSSI])
@@ -73,4 +73,3 @@ if __name__ == "__main__":
     
     rate = rospy.Rate(10)  # 10 Hz
     while not rospy.is_shutdown():
-        rate.sleep()
