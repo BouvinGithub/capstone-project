@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import rospy
-import math
+import rospy, math
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String  # Import String message type
 
@@ -11,16 +10,23 @@ class Robot:
         self.vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.rate = rospy.Rate(10)
         self.target_data = None  # Store received data
-
         # Subscriber for /processed_aoa_data
         rospy.Subscriber("/processed_aoa_data", String, self.callback)
 
     def move_to_distance(self, distance):
         outData = Twist()
-        t0 = rospy.get_time()
+        t0 = rospy.get_rostime().secs
+        
+        while not rospy.is_shutdown() and t0 == 0:
+            t0 = rospy.get_rostime().secs
+        
         current_distance = 0
 
-        outData.linear.x = 0.2 if distance > 0 else -0.2
+        if distance > 0:
+            outData.linear.x = 0.2 
+        else:
+            outData.linear.x = -0.2
+        
         while not rospy.is_shutdown() and abs(current_distance) < abs(distance):
             self.vel_pub.publish(outData)
             t1 = rospy.get_time()
@@ -33,14 +39,23 @@ class Robot:
     def rotate_to_angle(self, target_angle):
         outData = Twist()
         t0 = rospy.get_time()
+
+        while not rospy.is_shutdown() and t0 == 0:
+            t0 = rospy.get_rostime().secs
+        
         current_angle = 0
-        outData.angular.z = -0.3 if target_angle < 0 else 0.3
+
+        if target_angle < 0:
+            outData.angular.z = -1 * degrees2radians(30)
+        else:
+            outData.angular.z = degrees2radians(30)
+
         while not rospy.is_shutdown() and abs(current_angle) < abs(target_angle):
             self.vel_pub.publish(outData)
-            t1 = rospy.get_time()
-            current_angle = 0.3 * (t1 - t0)
-            self.rate.sleep()
+            t1 = rospy.get_rostime().secs
+            current_angle = degreesToRadians(33) * (t1 - t0)
         
+        self.rate.sleep()
         outData.angular.z = 0
         self.vel_pub.publish(outData)
 
@@ -51,6 +66,9 @@ class Robot:
     def callback(self, msg):
         """ Callback function to process incoming data """
         self.target_data = msg.data
+
+    def degreesToRadians(degree):
+        return degree * (math.pi/180.0)
 
 if __name__ == '__main__':
     try:
