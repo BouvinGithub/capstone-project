@@ -73,3 +73,4 @@ if __name__ == "__main__":
     
     rate = rospy.Rate(10)  # 10 Hz
     while not rospy.is_shutdown():
+        rate.sleep()
