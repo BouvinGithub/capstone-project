@@ -12,6 +12,8 @@ class Robot:
         self.target_data = None  # Store received data
         # Subscriber for /processed_aoa_data
         rospy.Subscriber("/processed_aoa_data", String, self.callback)
+        # to recieve updated values before completing job
+        rospy.Timer(rospy.Duration(3), self.process_target_data)
 
     def move_to_distance(self, distance):
         outData = Twist()
@@ -22,7 +24,9 @@ class Robot:
         
         current_distance = 0
 
-        if distance > 0:
+        if distance < 1 and distance > -1:
+            outData.linear.x = 0
+        elif distance > 0:
             outData.linear.x = 0.2 
         else:
             outData.linear.x = -0.2
