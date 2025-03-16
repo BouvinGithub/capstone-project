@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-import rospy, math
+import rospy
+import math
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String  # Import String message type
+
 
 class Robot:
     def __init__(self):
@@ -26,49 +28,50 @@ class Robot:
             outData.linear.x = 0.2 
         else:
             outData.linear.x = -0.2
+
+        t1 = 0
         
-        while not rospy.is_shutdown() and abs(current_distance) < abs(distance):
+        while not rospy.is_shutdown() and abs(current_distance) < abs(distance) and (t1-t0) < 5:
             self.vel_pub.publish(outData)
-            t1 = rospy.get_time()
+            t1 = rospy.get_rostime().secs
             current_distance = 0.2 * (t1 - t0)
             self.rate.sleep()
         
         outData.linear.x = 0
         self.vel_pub.publish(outData)
 
-    def rotate_to_angle(self, target_angle):
+    def rotate_to_angle(self, angle):
         outData = Twist()
-        t0 = rospy.get_time()
+        t0 = rospy.get_rostime().secs
 
         while not rospy.is_shutdown() and t0 == 0:
             t0 = rospy.get_rostime().secs
         
         current_angle = 0
 
-        if target_angle < 0:
-            outData.angular.z = -1 * degrees2radians(30)
+        if angle < 0:
+            outData.angular.z = -1 * math.radians(30)
         else:
-            outData.angular.z = degrees2radians(30)
+            outData.angular.z = math.radians(30)
 
-        while not rospy.is_shutdown() and abs(current_angle) < abs(target_angle):
+        while not rospy.is_shutdown() and abs(current_angle) < abs(math.radians(angle)):
             self.vel_pub.publish(outData)
             t1 = rospy.get_rostime().secs
-            current_angle = degreesToRadians(33) * (t1 - t0)
-        
-        self.rate.sleep()
+            current_angle = math.radians(33) * (t1 - t0)
+            self.rate.sleep()
+
         outData.angular.z = 0
         self.vel_pub.publish(outData)
 
-    def go_to_target(self, target_angle, target_distance):
-        self.rotate_to_angle(target_angle)
-        self.move_to_distance(target_distance)
+    def go_to_target(self, the_angle, the_distance):
+        self.rotate_to_angle(the_angle)
+        self.move_to_distance(the_distance)
+            
 
     def callback(self, msg):
         """ Callback function to process incoming data """
         self.target_data = msg.data
 
-    def degreesToRadians(degree):
-        return degree * (math.pi/180.0)
 
 if __name__ == '__main__':
     try:
@@ -79,8 +82,8 @@ if __name__ == '__main__':
             if myRobot.target_data:
                 try:
                     data_list = myRobot.target_data.split(",")
-                    target_angle = -float(data_list[3])  # Convert to float
-                    target_distance = float(data_list[1])  # Convert to float
+                    target_angle = -float(data_list[3])
+                    target_distance = float(data_list[1])
                     rospy.loginfo(f"Moving to angle: {target_angle}, distance: {target_distance}")
                     myRobot.go_to_target(target_angle, target_distance)
                     
