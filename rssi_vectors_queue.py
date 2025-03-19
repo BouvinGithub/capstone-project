@@ -71,6 +71,6 @@ if __name__ == "__main__":
     pub = rospy.Publisher(target_topic, String, queue_size=10)
     rospy.Subscriber("/aoa_data", String, process_rssi_data)
     
-    rate = rospy.Rate(10)  # 10 Hz
+    rate = rospy.Rate(30)
     while not rospy.is_shutdown():
         rate.sleep()
